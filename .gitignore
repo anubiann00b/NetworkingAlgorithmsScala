@@ -6,3 +6,7 @@ project/boot/
 project/plugins/project
 bin/
 gen/
+
+.ensime
+.ensime_cache
+.history
