@@ -7,6 +7,7 @@ import me.shreyasr.networking.component._
 
 class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingSystem(
   Family.all(classOf[InputComponent],
+             classOf[PosComponent],
              classOf[VelComponent],
              classOf[DirComponent],
              classOf[ShipStatsComponent]).get, p) {
@@ -14,6 +15,7 @@ class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends Iter
   override def processEntity(entity: Entity, delta: Float) = {
     val input = entity.get[InputComponent]
     val dir = entity.get[DirComponent]
+    val pos = entity.get[PosComponent]
     val vel = entity.get[VelComponent]
     val stats = entity.get[ShipStatsComponent]
 
@@ -27,5 +29,17 @@ class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends Iter
 
     if (input.turnCw) dir.dir -= stats.turn;
     if (input.turnCcw) dir.dir += stats.turn;
+
+    if (input.fireLaser) {
+      game.engine.addEntity(
+        new Entity()
+          .add(new PosComponent(pos.x, pos.y))
+          .add(new VelComponent(Utils.cos(dir.dir)*5, 5*Utils.sin(dir.dir)))
+          .add(new DirComponent(dir.dir))
+          .add(new DrawingComponent(List(
+                                      (0, 10),
+                                      (0, -10)
+                                    ))))
+    }
   }
 }

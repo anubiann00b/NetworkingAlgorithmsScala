@@ -4,7 +4,8 @@ import com.badlogic.ashley.core.Component
 
 sealed class Components extends Component
 final class InputComponent(var thrust: Boolean, var reverseThrust: Boolean,
-                           var turnCw: Boolean, var turnCcw: Boolean) extends Components
+                           var turnCw: Boolean, var turnCcw: Boolean,
+                           var fireLaser: Boolean) extends Components
 final class PosComponent(var x: Float, var y: Float) extends Components
 final class VelComponent(var dx: Float, var dy: Float) extends Components
 final class DirComponent(var dir: Float) extends Components

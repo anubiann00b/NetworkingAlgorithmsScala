@@ -7,7 +7,6 @@ import com.badlogic.gdx.{ApplicationAdapter, Gdx}
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.ExtendViewport
-import me.shreyasr.networking._
 import me.shreyasr.networking.component._
 import me.shreyasr.networking.system._
 
@@ -24,7 +23,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     engine.addEntity(new Entity()
                        .add(new PosComponent(4, 7))
                        .add(new VelComponent(0, 0))
-                       .add(new InputComponent(false, false, false, false))
+                       .add(new InputComponent(false, false, false, false, false))
                        .add(new DirComponent(0))
                        .add(new ShipStatsComponent(0.1f, 0.03f))
                        .add(new DrawingComponent(
@@ -66,8 +65,8 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     shapeRenderer.setProjectionMatrix(camera.combined)
     shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
-    (0 to 4000 by 500).foreach(x => shapeRenderer.line(x, 0, x, 4000))
-    (0 to 4000 by 500).foreach(y => shapeRenderer.line(0, y, 4000, y))
+    (0 to 4000 by 500).foreach(x => shapeRenderer.line(x.toFloat, 0, x.toFloat, 4000))
+    (0 to 4000 by 500).foreach(y => shapeRenderer.line(0, y.toFloat, 4000, y.toFloat))
 
     engine.getEntitiesFor(Family.all(
                             classOf[PosComponent],

@@ -16,5 +16,6 @@ class InputSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingSyste
     input.reverseThrust = Gdx.input.isKeyPressed(Keys.S)
     input.turnCw = Gdx.input.isKeyPressed(Keys.D)
     input.turnCcw = Gdx.input.isKeyPressed(Keys.A)
+    input.fireLaser = Gdx.input.isKeyJustPressed(Keys.SPACE)
   }
 }
