@@ -6,13 +6,16 @@ import me.shreyasr.networking._
 import me.shreyasr.networking.component._
 
 class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingSystem(
-  Family.all(classOf[InputComponent],
-             classOf[PosComponent],
-             classOf[VelComponent],
-             classOf[DirComponent],
-             classOf[ShipStatsComponent]).get, p) {
+  Family.all(
+    classOf[IdComponent],
+    classOf[InputComponent],
+    classOf[PosComponent],
+    classOf[VelComponent],
+    classOf[DirComponent],
+    classOf[ShipStatsComponent]).get, p) {
 
   override def processEntity(entity: Entity, delta: Float) = {
+    val id = entity.get[IdComponent]
     val input = entity.get[InputComponent]
     val dir = entity.get[DirComponent]
     val pos = entity.get[PosComponent]
@@ -33,12 +36,12 @@ class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends Iter
     if (input.fireLaser) {
       game.engine.addEntity(
         new Entity()
+          .add(new ProjectileComponent(id.id))
           .add(new PosComponent(pos.x, pos.y))
-          .add(new VelComponent(Utils.cos(dir.dir)*5, 5*Utils.sin(dir.dir)))
+          .add(new VelComponent(5*Utils.cos(dir.dir), 5*Utils.sin(dir.dir)))
           .add(new DirComponent(dir.dir))
           .add(new DrawingComponent(List(
-                                      (0, 10),
-                                      (0, -10)
+                                      PolarLine(PolarPoint(0, 10), PolarPoint(180, 10))
                                     ))))
     }
   }

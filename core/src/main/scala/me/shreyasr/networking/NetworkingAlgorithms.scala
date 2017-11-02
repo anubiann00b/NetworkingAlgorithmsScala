@@ -21,24 +21,40 @@ class NetworkingAlgorithms extends ApplicationAdapter {
 
   override def create() = {
     engine.addEntity(new Entity()
+                       .add(new IdComponent(12498))
                        .add(new PosComponent(4, 7))
                        .add(new VelComponent(0, 0))
                        .add(new InputComponent(false, false, false, false, false))
                        .add(new DirComponent(0))
-                       .add(new ShipStatsComponent(0.1f, 0.03f))
+                       .add(new ShipStatsComponent(0.1f, 0.03f, 10, 10))
                        .add(new DrawingComponent(
                               List(
-                                (0, 30),
-                                (140, 30),
-                                (220, 30)
+                                PolarLine(PolarPoint(0, 30), PolarPoint(140, 30)),
+                                PolarLine(PolarPoint(0, 30), PolarPoint(220, 30)),
+                                PolarLine(PolarPoint(140, 30), PolarPoint(220, 30))
                               )))
                        .add(new CameraFocusComponent)
+    )
+
+    engine.addEntity(new Entity()
+                       .add(new IdComponent(4215))
+                       .add(new PosComponent(500, 500))
+                       .add(new VelComponent(0, 0))
+                       .add(new DirComponent(0))
+                       .add(new ShipStatsComponent(0.1f, 0.03f, 10, 10))
+                       .add(new DrawingComponent(
+                              List(
+                                PolarLine(PolarPoint(0, 30), PolarPoint(140, 30)),
+                                PolarLine(PolarPoint(0, 30), PolarPoint(220, 30)),
+                                PolarLine(PolarPoint(140, 30), PolarPoint(220, 30))
+                              )))
     )
 
     val p = { var i = 0; () => { i += 1; i} }
     engine.addSystem(new InputSystem(p(), this))
     engine.addSystem(new InputProcessingSystem(p(), this))
     engine.addSystem(new VelocityUpdateSystem(p(), this))
+    engine.addSystem(new CollisionSystem(p(), this))
 }
 
   override def render() = {
@@ -65,6 +81,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     shapeRenderer.setProjectionMatrix(camera.combined)
     shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
+    shapeRenderer.setColor(1, 1, 1, 1)
     (0 to 4000 by 500).foreach(x => shapeRenderer.line(x.toFloat, 0, x.toFloat, 4000))
     (0 to 4000 by 500).foreach(y => shapeRenderer.line(0, y.toFloat, 4000, y.toFloat))
 
@@ -81,14 +98,17 @@ class NetworkingAlgorithms extends ApplicationAdapter {
   private def drawEntity(entity: Entity) = {
     val pos = entity.get[PosComponent]
     val dir = entity.get[DirComponent].dir
-    val points = entity.get[DrawingComponent].radialPoints
-    points.zip(points.tail ++ points.headOption).toList
-      .foreach{case ((theta1, r1), (theta2, r2)) => {
-                 val x1 = pos.x + r1 * Utils.cos(dir+theta1.radians)
-                 val y1 = pos.y + r1 * Utils.sin(dir+theta1.radians)
-                 val x2 = pos.x + r2 * Utils.cos(dir+theta2.radians)
-                 val y2 = pos.y + r2 * Utils.sin(dir+theta2.radians)
-                 shapeRenderer.line(x1, y1, x2, y2)
-               }}
+    val lines = entity.get[DrawingComponent].linesPolar
+
+    val damage = entity.getOpt[ShipStatsComponent]
+      .map(s => s.health.toFloat/s.maxHealth)
+      .map(Utils.clamp(_, 0, 1))
+      .getOrElse(1f)
+
+    shapeRenderer.setColor(1, damage, damage, 1)
+
+    lines
+      .map(_.getCartesian(pos.x, pos.y, dir))
+      .foreach{case (x1, y1, x2, y2) => { shapeRenderer.line(x1, y1, x2, y2) }}
   }
 }

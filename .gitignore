@@ -10,3 +10,5 @@ gen/
 .ensime
 .ensime_cache
 .history
+
+.idea/
