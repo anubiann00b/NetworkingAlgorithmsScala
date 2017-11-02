@@ -16,7 +16,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
   val engine = new Engine
   lazy val shapeRenderer = { val s = new ShapeRenderer; s.setAutoShapeType(true); s };
   lazy val camera = new OrthographicCamera()
-  lazy val viewport = new ExtendViewport(1280/1f, 700/1f, 1280/1f, 1000/1f, camera)
+  lazy val viewport = new ExtendViewport(1280*1.2f, 700*1.2f, 1280*1.2f, 1000*1.2f, camera)
 
   override def resize(width: Int, height: Int) = viewport.update(width, height)
 
@@ -33,6 +33,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
                                 (140, 30),
                                 (220, 30)
                               )))
+                       .add(new CameraFocusComponent)
     )
 
     val p = { var i = 0; () => { i += 1; i} }
@@ -47,12 +48,26 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     Gdx.gl.glClearColor(0, 0, 0, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-    camera.position.set(0, 0, 0);
+    engine.getEntitiesFor(
+      Family.all(classOf[CameraFocusComponent], classOf[PosComponent]).get).asScala
+      .headOption
+      .map(_.get[PosComponent])
+      .foreach(pos => {
+                 val paddingX = viewport.getWorldWidth / 2
+                 val paddingY = viewport.getWorldHeight / 2
+                 camera.position.set(
+                   Utils.clamp(pos.x, paddingX, 4000 - paddingX),
+                   Utils.clamp(pos.y, paddingY, 4000 - paddingY), 0)
+               })
+
     viewport.apply()
     camera.update()
 
     shapeRenderer.setProjectionMatrix(camera.combined)
-    shapeRenderer.begin()
+    shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
+
+    (0 to 4000 by 500).foreach(x => shapeRenderer.line(x, 0, x, 4000))
+    (0 to 4000 by 500).foreach(y => shapeRenderer.line(0, y, 4000, y))
 
     engine.getEntitiesFor(Family.all(
                             classOf[PosComponent],

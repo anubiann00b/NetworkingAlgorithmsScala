@@ -10,3 +10,4 @@ final class VelComponent(var dx: Float, var dy: Float) extends Components
 final class DirComponent(var dir: Float) extends Components
 final class ShipStatsComponent(var thrust: Float, var turn: Float) extends Components
 final class DrawingComponent(var radialPoints: List[Tuple2[Float, Float]]) extends Components
+final class CameraFocusComponent extends Components
