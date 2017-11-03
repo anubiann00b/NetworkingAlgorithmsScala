@@ -1,5 +1,5 @@
 Week 6 Update
-###
+===
 
 This week, I implemented the basic game structure, including movement, shooting the simple laser projectile, collision detection, and health.
 
@@ -11,7 +11,7 @@ Entity sprites are handled as a list of lines. These lines also double as the en
 
 The game development stuff isn't terribly new to me, but I'm really enjoying working in Scala. There are a couple paradigms I really like:
 
-NetworkingAlgorithms.scala:110
+> NetworkingAlgorithms.scala:110
 ```
 lines
       .map(_.getCartesian(pos.x, pos.y, dir))
@@ -20,7 +20,7 @@ lines
 
 I'm a big fan of this functional/stream type paradigm. I'm not sure exactly what to call it. In Java/Android, a similar pattern is called Functional Reactive Programming but I feel like there's a better term for it, especially in the context of a functional language.
 
-NetworkingAlgorithms.scala:103
+> NetworkingAlgorithms.scala:103
 ```
 val damage = entity.getOpt[ShipStatsComponent]
       .map(s => s.health.toFloat / s.maxHealth)
@@ -30,7 +30,7 @@ val damage = entity.getOpt[ShipStatsComponent]
 
 The Option type is one of my favorite things ever. I believe it's equivalent to the Maybe monad in Haskell, kinda being a union type. It's either `Some(x)` or `None`. It's really useful to do the thing where you operate on the contained object within the monad via map in this case. Here, we're getting a ShipStatsComponent that may or may not exist, and mapping it to get the health of the ship between 0 and 1, and then getting it if it exists or 1 if it does not. 
 
-CollisionSystem.scala:66
+> CollisionSystem.scala:66
 ```
 val linePairs = for (a <- eLines; b <- pLines) yield (a, b)
 ```
