@@ -73,7 +73,6 @@ class CollisionSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingS
         })
       .foreach(
         projectile => {
-          println("Goodbye, cruel world!")
           eStats.health -= 1
           getEngine.removeEntity(projectile)
         })

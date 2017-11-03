@@ -21,7 +21,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
 
   override def create() = {
     engine.addEntity(new Entity()
-                       .add(new IdComponent(12498))
+                       .add(new IdComponent(1))
                        .add(new PosComponent(4, 7))
                        .add(new VelComponent(0, 0))
                        .add(new InputComponent(false, false, false, false, false))
@@ -37,8 +37,8 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     )
 
     engine.addEntity(new Entity()
-                       .add(new IdComponent(4215))
-                       .add(new PosComponent(500, 500))
+                       .add(new IdComponent(2))
+                       .add(new PosComponent(700, 700))
                        .add(new VelComponent(0, 0))
                        .add(new DirComponent(0))
                        .add(new ShipStatsComponent(0.1f, 0.03f, 10, 10))
@@ -50,11 +50,11 @@ class NetworkingAlgorithms extends ApplicationAdapter {
                               )))
     )
 
-    val p = { var i = 0; () => { i += 1; i} }
-    engine.addSystem(new InputSystem(p(), this))
-    engine.addSystem(new InputProcessingSystem(p(), this))
-    engine.addSystem(new VelocityUpdateSystem(p(), this))
-    engine.addSystem(new CollisionSystem(p(), this))
+    val priority = { var i = 0; () => { i += 1; i} }
+    engine.addSystem(new InputSystem(priority(), this))
+    engine.addSystem(new InputProcessingSystem(priority(), this))
+    engine.addSystem(new VelocityUpdateSystem(priority(), this))
+    engine.addSystem(new CollisionSystem(priority(), this))
 }
 
   override def render() = {
@@ -101,7 +101,7 @@ class NetworkingAlgorithms extends ApplicationAdapter {
     val lines = entity.get[DrawingComponent].linesPolar
 
     val damage = entity.getOpt[ShipStatsComponent]
-      .map(s => s.health.toFloat/s.maxHealth)
+      .map(s => s.health.toFloat / s.maxHealth)
       .map(Utils.clamp(_, 0, 1))
       .getOrElse(1f)
 
