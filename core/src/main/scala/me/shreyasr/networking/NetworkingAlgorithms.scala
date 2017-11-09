@@ -1,5 +1,6 @@
 package me.shreyasr.networking
 
+import me.shreyasr.networking.network.{ PingPacket, Socket }
 import scala.collection.JavaConverters._
 
 import com.badlogic.ashley.core.{Engine, Entity, Family}
@@ -10,7 +11,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import me.shreyasr.networking.component._
 import me.shreyasr.networking.system._
 
-class NetworkingAlgorithms extends ApplicationAdapter {
+class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
 
   val engine = new Engine
   lazy val shapeRenderer = { val s = new ShapeRenderer; s.setAutoShapeType(true); s };
