@@ -14,8 +14,20 @@ class VelocityUpdateSystem(p: Int, val game: NetworkingAlgorithms) extends Itera
   override def processEntity(entity: Entity, delta: Float) = {
     val pos = entity.get[PosComponent]
     val vel = entity.get[VelComponent]
+    val stats = entity.getOpt[ShipStatsComponent]
 
     pos.x += vel.dx
     pos.y += vel.dy
+
+    stats.map(_.maxSpeed).foreach(
+      maxSpeed => {
+        if (vel.magnitude > maxSpeed) {
+          val scaling = vel.magnitude / maxSpeed
+
+          vel.dx /= scaling
+          vel.dy /= scaling
+        }
+      })
+
   }
 }

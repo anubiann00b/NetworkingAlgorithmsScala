@@ -8,7 +8,7 @@ import me.shreyasr.networking.component._
 class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingSystem(
   Family.all(
     classOf[IdComponent],
-    classOf[InputComponent],
+//    classOf[InputComponent],
     classOf[PosComponent],
     classOf[VelComponent],
     classOf[DirComponent],
@@ -16,7 +16,9 @@ class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends Iter
 
   override def processEntity(entity: Entity, delta: Float) = {
     val id = entity.get[IdComponent]
-    val input = entity.get[InputComponent]
+    val input = entity.getOpt[InputComponent].getOrElse(
+      new InputComponent(false, false, false, false,
+                         math.random > 0.9, math.random > 0.99))
     val dir = entity.get[DirComponent]
     val pos = entity.get[PosComponent]
     val vel = entity.get[VelComponent]
@@ -34,15 +36,11 @@ class InputProcessingSystem(p: Int, val game: NetworkingAlgorithms) extends Iter
     if (input.turnCcw) dir.dir += stats.turn;
 
     if (input.fireLaser) {
-      game.engine.addEntity(
-        new Entity()
-          .add(new ProjectileComponent(id.id))
-          .add(new PosComponent(pos.x, pos.y))
-          .add(new VelComponent(5*Utils.cos(dir.dir), 5*Utils.sin(dir.dir)))
-          .add(new DirComponent(dir.dir))
-          .add(new DrawingComponent(List(
-                                      PolarLine(PolarPoint(0, 10), PolarPoint(180, 10))
-                                    ))))
+      game.engine.addEntity(EntityFactory.newLaser(id.id, pos, dir.dir))
+    }
+
+    if (input.fireMissile) {
+      game.engine.addEntity(EntityFactory.newMissile(id.id, pos, dir.dir))
     }
   }
 }

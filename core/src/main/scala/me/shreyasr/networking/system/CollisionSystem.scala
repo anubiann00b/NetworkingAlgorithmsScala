@@ -13,13 +13,10 @@ import scala.collection.JavaConverters._
 class CollisionSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingSystem(
   Family
     .all(
-      classOf[IdComponent],
       classOf[PosComponent],
       classOf[DirComponent],
       classOf[DrawingComponent],
-      classOf[ShipStatsComponent])
-    .exclude(
-      classOf[ProjectileComponent]).get, p) {
+      classOf[ShipStatsComponent]).get, p) {
 
   var projectiles: ImmutableArray[Entity] = null
 
@@ -40,17 +37,25 @@ class CollisionSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingS
     projectiles = null;
   }
 
+  // Entity can be a ship, a projectile with a ShipStatsComponent (eg. a missile),
+  // but not a laser, as lasers don't have ShipStatsComponents
   override def processEntity(entity: Entity, delta: Float) = {
-    val eId = entity.get[IdComponent]
+    val eId = entity.getOpt[IdComponent] // Projectiles don't have IDs
     val eDir = entity.get[DirComponent]
     val ePos = entity.get[PosComponent]
     val eDrawing = entity.get[DrawingComponent]
     val eStats = entity.get[ShipStatsComponent]
-
+    val eProjectile = entity.getOpt[ProjectileComponent]
 
     projectiles.asScala
-      .filter(
-        projectile => eId.id != projectile.get[ProjectileComponent].ownerId)
+      .filterNot(
+        projectile => {
+          val pOwnerId = projectile.get[ProjectileComponent].ownerId
+          // check if we are this projectiles owner
+          // or if we are a projectile sharing the same owner
+          eId.exists(eId => eId.id == pOwnerId) ||
+            eProjectile.exists(eOwnerId => eOwnerId.ownerId == pOwnerId)
+        })
       .filter(
         projectile => {
           val pDir = projectile.get[DirComponent]
@@ -67,7 +72,8 @@ class CollisionSystem(p: Int, val game: NetworkingAlgorithms) extends IteratingS
 
           linePairs.exists{
             case ((ex1, ey1, ex2, ey2), (px1, py1, px2, py2)) => {
-              Intersector.intersectSegments(ex1, ey1, ex2, ey2, px1, py1, px2, py2, null)
+              Intersector.intersectSegments(ex1, ey1, ex2, ey2,
+                                            px1, py1, px2, py2, null)
             }
           }
         })
