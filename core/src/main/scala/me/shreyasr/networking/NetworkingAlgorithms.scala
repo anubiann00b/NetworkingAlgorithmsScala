@@ -31,11 +31,18 @@ class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
     engine.addSystem(new VelocityUpdateSystem(priority(), this))
     engine.addSystem(new CollisionSystem(priority(), this))
     engine.addSystem(new HealthCheckSystem(priority(), this))
-}
+  }
 
+
+  var cnt = 0;
   override def render() = {
+    cnt += 1
+    socket.send(new PingPacket(cnt))
     engine.update(1);
+    drawAll();
+  }
 
+  private def drawAll() = {
     Gdx.gl.glClearColor(0, 0, 0, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 

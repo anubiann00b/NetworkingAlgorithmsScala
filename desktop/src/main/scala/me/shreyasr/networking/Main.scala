@@ -6,7 +6,7 @@ import me.shreyasr.networking.network.{ PingPacket, Socket }
 object Main extends App {
   val socket = new Socket()
   socket.connect("127.0.0.1")
-  socket.send(new PingPacket)
+  socket.send(new PingPacket(57))
 
   val config = new LwjglApplicationConfiguration
   config.title = "NetworkingAlgorithms"

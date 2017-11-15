@@ -18,17 +18,24 @@ class Socket(port: Option[Int] = None) {
     rawSocket.connect(InetAddress.getByName(ip), SERVER_PORT)
   }
 
+  def close() = {
+    rawSocket.close()
+  }
+
   def send(packet: Packet) = {
-    val len = packet.write(writeBuffer)
-    rawSocket.send(new DatagramPacket(writeBuffer, len))
+    val stream = new SerializationStream(writeBuffer)
+    Packet.writePacket(stream, packet)
+    rawSocket.send(new DatagramPacket(writeBuffer, stream.getPos()))
   }
 
   def listen(listener: Packet => Unit) = {
+    rawSocket.setSoTimeout(10000)
     val recvPacket = new DatagramPacket(readBuffer, readBuffer.length)
 
     while (true) {
       rawSocket.receive(recvPacket)
-      listener(Packet.readPacket(readBuffer, recvPacket.getLength()))
+      listener(Packet.readPacket(
+                 new SerializationStream(readBuffer, recvPacket.getLength)))
     }
   }
 }
