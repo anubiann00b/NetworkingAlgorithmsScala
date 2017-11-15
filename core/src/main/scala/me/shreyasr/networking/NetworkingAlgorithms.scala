@@ -1,6 +1,6 @@
 package me.shreyasr.networking
 
-import me.shreyasr.networking.network.{ PingPacket, Socket }
+import me.shreyasr.networking.network.InputPacket
 import scala.collection.JavaConverters._
 
 import com.badlogic.ashley.core.{Engine, Entity, Family}
@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import me.shreyasr.networking.component._
+import me.shreyasr.networking.network.Socket
 import me.shreyasr.networking.system._
 
 class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
@@ -16,7 +17,11 @@ class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
   val engine = new Engine
   lazy val shapeRenderer = { val s = new ShapeRenderer; s.setAutoShapeType(true); s };
   lazy val camera = new OrthographicCamera()
-  lazy val viewport = new ExtendViewport(1280*1.2f, 700*1.2f, 1280*1.2f, 1000*1.2f, camera)
+  lazy val viewport = new ExtendViewport(1280*1.2f, 700*1.2f,
+                                         1280*1.2f, 1000*1.2f, camera)
+
+  def player = engine.getEntitiesFor(
+    Family.all(classOf[CameraFocusComponent]).get).first()
 
   override def resize(width: Int, height: Int) = viewport.update(width, height)
 
@@ -37,7 +42,7 @@ class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
   var cnt = 0;
   override def render() = {
     cnt += 1
-    socket.send(new PingPacket(cnt))
+    socket.send(new InputPacket(player.get[InputComponent]))
     engine.update(1);
     drawAll();
   }
