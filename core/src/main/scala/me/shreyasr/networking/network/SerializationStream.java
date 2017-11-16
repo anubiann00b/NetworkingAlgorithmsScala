@@ -43,10 +43,31 @@ public class SerializationStream {
     public int readInt() {
         checkDataSize(4);
         return
-            (buffer[pos++] & 255) << 0 |
-            (buffer[pos++] & 255) << 8 |
-            (buffer[pos++] & 255) << 16 |
-            (buffer[pos++] & 255) << 24;
+            (buffer[pos++] & 0xFF) << 0 |
+            (buffer[pos++] & 0xFF) << 8 |
+            (buffer[pos++] & 0xFF) << 16 |
+            (buffer[pos++] & 0xFF) << 24;
+    }
+
+    public void writeLong(long l) {
+        writeInt((int)(l >> 0));
+        writeInt((int)(l >> 32));
+    }
+
+    public long readLong() {
+        checkDataSize(8);
+        return
+            ((long)readInt() & 0xFFFFFFFFL) |
+            ((long)readInt() << 32);
+    }
+
+    public void writeFloat(float f) {
+        writeInt(Float.floatToRawIntBits(f));
+    }
+
+    public float readFloat() {
+        checkDataSize(4);
+        return Float.intBitsToFloat(readInt());
     }
 
     public void writeBools(boolean b1, boolean b2, boolean b3, boolean b4,
@@ -64,6 +85,10 @@ public class SerializationStream {
 
     public boolean readBool(int index) {
         return ((buffer[pos] >> index) & 0x01) == 1;
+    }
+
+    public void skipByte() {
+        pos++;
     }
 
     private void checkDataSize(int additionalBytes) {

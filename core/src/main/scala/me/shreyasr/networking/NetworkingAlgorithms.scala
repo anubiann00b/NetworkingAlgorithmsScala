@@ -1,6 +1,7 @@
 package me.shreyasr.networking
 
-import me.shreyasr.networking.network.InputPacket
+import java.util.Arrays
+import me.shreyasr.networking.network.Packet
 import scala.collection.JavaConverters._
 
 import com.badlogic.ashley.core.{Engine, Entity, Family}
@@ -9,7 +10,7 @@ import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import me.shreyasr.networking.component._
-import me.shreyasr.networking.network.Socket
+import me.shreyasr.networking.network.{GameStatePacket, SerializationStream, Socket}
 import me.shreyasr.networking.system._
 
 class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
@@ -40,11 +41,27 @@ class NetworkingAlgorithms(val socket: Socket) extends ApplicationAdapter {
 
 
   var cnt = 0;
+  val buffer = new Array[Byte](32184)
   override def render() = {
     cnt += 1
-    socket.send(new InputPacket(player.get[InputComponent]))
+    // socket.send(new InputPacket(player.get[InputComponent]))
     engine.update(1);
     drawAll();
+
+    val gameState = new GameStatePacket(engine.getEntities.asScala.toList)
+    val writeStream = new SerializationStream(buffer)
+    Packet.writePacket(writeStream, gameState)
+
+    //println(buffer.take(writeStream.getPos).mkString(" "))
+    println(s"Bytes: ${writeStream.getPos}")
+
+    val readStream = new SerializationStream(buffer, writeStream.getPos)
+    val newGameState = Packet.readPacket(readStream).asInstanceOf[GameStatePacket]
+
+    engine.removeAllEntities()
+
+    newGameState.entities.foreach(
+      engine.addEntity(_))
   }
 
   private def drawAll() = {
